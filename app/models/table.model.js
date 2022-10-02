@@ -36,7 +36,6 @@ const sql = require("./db.js");
 
       sqlWhere = `${sqlWhere} ${(sqlWhere === '')? 'WHERE ' : "and "} ${params.filterField} ${params.filterType} ?`;
       values.push(value);
-      console.log(values)
     }
     
     //Pagination params
