@@ -23,6 +23,48 @@ const sql = require("./db.js");
   Table.read = (params, result) => {
     
     let sqlWhere = '';
+    let sqlLimit = '';
+    let values = [];
+    
+    //Filter params
+    if (params.hasOwnProperty("filterField")) {      
+      let value = params.filterValue;
+
+      if(params.filterType === 'LIKE'){
+        value = `\%${value}\%`;
+      }
+
+      sqlWhere = `${sqlWhere} ${(sqlWhere === '')? 'WHERE ' : "and "} ${params.filterField} ${params.filterType} ?`;
+      values.push(value);
+      console.log(values)
+    }
+    
+    //Pagination params
+    if (params.hasOwnProperty("currentPage")) { 
+      const count = Number(params.count);
+      const startFromRecord = Number(params.currentPage) * count;
+      sqlLimit = `LIMIT ?, ?`;
+      values.push(startFromRecord);
+      values.push(count);
+    }
+
+    sql.query(`SELECT *, DATE_FORMAT(date_, '%Y-%m-%d') as DateYYMMDD FROM filter_table ${sqlWhere} ORDER BY date_ ${sqlLimit}`, values, (err, res) => {
+      //операция вставки из SQL
+      if (err) {
+        console.log("error: ", err);
+        result(err, null);
+        return;
+      }
+      else{
+        console.log("Успешно прочитаны данные по параметрам: ", params);
+        result(null, res);
+      }
+    });
+  };
+
+  Table.read_old = (params, result) => {
+    
+    let sqlWhere = '';
     let values = [];
 
     if (params.hasOwnProperty("user_id")) {
@@ -54,5 +96,7 @@ const sql = require("./db.js");
       }
     });
   };
+
+ 
 
   module.exports = Table;
