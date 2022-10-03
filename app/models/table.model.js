@@ -23,6 +23,7 @@ const sql = require("./db.js");
   Table.read = (params, result) => {
     
     let sqlWhere = '';
+    let sqlSort = '';
     let sqlLimit = '';
     let values = [];
     let filterValues = [];
@@ -41,6 +42,13 @@ const sql = require("./db.js");
 
     values = [...filterValues, ...filterValues]
 
+
+    //Sort param
+    if (params.hasOwnProperty("sortField") && params.sortField !== 'DEFAULT') {
+      sqlSort = `ORDER BY ${params.sortField}`;      
+      //values.push(params.sortField);
+    }
+
     //Pagination params
     if (params.hasOwnProperty("currentPage")) { 
       const count = Number(params.count);
@@ -51,7 +59,7 @@ const sql = require("./db.js");
     }
 
     const totalCountSelect = `SELECT COUNT(*) as totalCount FROM filter_table ${sqlWhere}`;
-    const filteredDataSelect = `SELECT *, DATE_FORMAT(date_, '%Y-%m-%d') as DateYYMMDD FROM filter_table ${sqlWhere} ORDER BY date_ ${sqlLimit}`;
+    const filteredDataSelect = `SELECT *, DATE_FORMAT(date_, '%Y-%m-%d') as DateYYMMDD FROM filter_table ${sqlWhere} ${sqlSort} ${sqlLimit}`;
 
     sql.query(`${totalCountSelect};${filteredDataSelect}`, values, (err, res) => {
       if (err) {
