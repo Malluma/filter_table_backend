@@ -6,7 +6,8 @@ const dbConfig = require("../config/db.config.js");
     host: dbConfig.HOST,
     user: dbConfig.USER,
     password: dbConfig.PASSWORD,
-    database: dbConfig.DB
+    database: dbConfig.DB,
+    multipleStatements: true
   });
   
   // открываем наше соединение с базой данных

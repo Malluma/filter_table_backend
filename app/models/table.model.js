@@ -25,6 +25,7 @@ const sql = require("./db.js");
     let sqlWhere = '';
     let sqlLimit = '';
     let values = [];
+    let filterValues = [];
     
     //Filter params
     if (params.hasOwnProperty("filterField")) {      
@@ -35,9 +36,11 @@ const sql = require("./db.js");
       }
 
       sqlWhere = `${sqlWhere} ${(sqlWhere === '')? 'WHERE ' : "and "} ${params.filterField} ${params.filterType} ?`;
-      values.push(value);
+      filterValues.push(value);
     }
-    
+
+    values = [...filterValues, ...filterValues]
+
     //Pagination params
     if (params.hasOwnProperty("currentPage")) { 
       const count = Number(params.count);
@@ -47,20 +50,10 @@ const sql = require("./db.js");
       values.push(count);
     }
 
-    let totalCount = 0;
+    const totalCountSelect = `SELECT COUNT(*) as totalCount FROM filter_table ${sqlWhere}`;
+    const filteredDataSelect = `SELECT *, DATE_FORMAT(date_, '%Y-%m-%d') as DateYYMMDD FROM filter_table ${sqlWhere} ORDER BY date_ ${sqlLimit}`;
 
-    sql.query(`SELECT COUNT(*) as totalCount FROM filter_table ${sqlWhere}`, values, (err, res) => {
-      if (err) {
-        console.log("error: ", err);
-        result(err, null);
-        return;
-      } else{
-        totalCount = res[0].totalCount;
-        console.log("Успешно посчитано количество всех записей по параметрам: ", totalCount);
-      }
-    });
-
-    sql.query(`SELECT *, DATE_FORMAT(date_, '%Y-%m-%d') as DateYYMMDD FROM filter_table ${sqlWhere} ORDER BY date_ ${sqlLimit}`, values, (err, res) => {
+    sql.query(`${totalCountSelect};${filteredDataSelect}`, values, (err, res) => {
       if (err) {
         console.log("error: ", err);
         result(err, null);
@@ -68,10 +61,7 @@ const sql = require("./db.js");
       }
       else{
         console.log("Успешно прочитаны данные по параметрам: ", params);
-        const data = {data: res, totalCount: totalCount}
-        console.log('data')
-        console.log(data)
-
+        const data = {totalCount: res[0][0].totalCount, data: res[1]}
         result(null, data);
       }
     });
