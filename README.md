@@ -1,7 +1,7 @@
 API for "filter_table" project (https://github.com/Malluma/filter_table)
 
-Проект написан с использованием express и библиотеки mysql для js.
-База данных MySQL.
+Проект написан с использованием express и библиотеки mysql для js. База данных соответственно MySQL.
+
 API позволяет получить данные из базы данных с отбром по полю таблицы (=,<,>,Like), сортировкой и отбору по конкретной странице(пагинацией).
 
 ## Create Database
