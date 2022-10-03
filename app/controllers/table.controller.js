@@ -48,7 +48,7 @@ exports.read = (req, res) => {
 
   Table.read(req.query, (err, data) => {
 
-    //console.log(data)
+    console.log(data)
 
     if (err) {
       if (err.kind === "not_found") {

@@ -47,8 +47,20 @@ const sql = require("./db.js");
       values.push(count);
     }
 
+    let totalCount = 0;
+
+    sql.query(`SELECT COUNT(*) as totalCount FROM filter_table ${sqlWhere}`, values, (err, res) => {
+      if (err) {
+        console.log("error: ", err);
+        result(err, null);
+        return;
+      } else{
+        totalCount = res[0].totalCount;
+        console.log("Успешно посчитано количество всех записей по параметрам: ", totalCount);
+      }
+    });
+
     sql.query(`SELECT *, DATE_FORMAT(date_, '%Y-%m-%d') as DateYYMMDD FROM filter_table ${sqlWhere} ORDER BY date_ ${sqlLimit}`, values, (err, res) => {
-      //операция вставки из SQL
       if (err) {
         console.log("error: ", err);
         result(err, null);
@@ -56,46 +68,14 @@ const sql = require("./db.js");
       }
       else{
         console.log("Успешно прочитаны данные по параметрам: ", params);
-        result(null, res);
+        const data = {data: res, totalCount: totalCount}
+        console.log('data')
+        console.log(data)
+
+        result(null, data);
       }
     });
+
   };
-
-  Table.read_old = (params, result) => {
-    
-    let sqlWhere = '';
-    let values = [];
-
-    if (params.hasOwnProperty("user_id")) {
-      sqlWhere = `${sqlWhere} ${(sqlWhere === '')? 'WHERE ' : "and "} user_id = ?`;
-      values.push(params.user_id);
-    }
-
-    if (params.hasOwnProperty("activity_type")) {
-      sqlWhere = `${sqlWhere} ${(sqlWhere === '')? 'WHERE ' : "and "} activity_type = ?`;
-      values.push(params.activity_type);
-    }
-
-    if (params.hasOwnProperty("interval_start")) {
-      sqlWhere = `${sqlWhere} ${(sqlWhere === '')? 'WHERE ' : "and "} interval_start >= ?`;
-      values.push(params.interval_start);
-    }
-    
-    sql.query(`SELECT *, DATE_FORMAT(date_, '%Y-%m-%d') as DateYYMMDD FROM filter_table ${sqlWhere} ORDER BY date_`, values, (err, res) => {
-      //операция вставки из SQL
-      if (err) {
-        console.log("error: ", err);
-        result(err, null);
-        //немного бедная обработка ошибок, но на первое время хватит
-        return;
-      }
-      else{
-        console.log("Успешно прочитаны данные по параметрам: ", params);
-        result(null, res);
-      }
-    });
-  };
-
  
-
   module.exports = Table;
